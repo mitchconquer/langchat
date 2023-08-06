@@ -34,11 +34,12 @@ export default function Welcome({
               .filter((msg) => msg.role !== 'system')
               .map((msg, i) => (
                 <div
+                  key={i}
                   className={`${messageClass} ${
                     msg.role === 'user' ? userMessageClass : systemMessageClass
                   }`}
                 >
-                  <p key={i}>{msg.content}</p>
+                  <p>{msg.content}</p>
                   {msg.role === 'user' && (
                     <button
                       className="self-end"

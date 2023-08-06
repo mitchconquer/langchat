@@ -33,7 +33,7 @@ export default async function speak(req: Request, res: Response) {
 
     return res.send(response.audioContent as Buffer);
   } catch (error) {
-    console.log('Error generating text-to-speech', error);
+    console.log('Error generating text-to-speech', error, text);
     return res.status(500).json({ error: error.message });
   }
 }

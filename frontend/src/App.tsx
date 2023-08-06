@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Composer from './components/Composer';
+import Menu from './components/Menu';
 import Toolbar from './components/Toolbar/Toolbar';
-import Welcome from './components/Welcome';
-import { Message } from './types';
+import Conversation from './components/Conversation';
+import { ConvoContext, Message } from './types';
 
 const localStorageKey = 'messages';
 
@@ -46,6 +47,8 @@ function App() {
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const mediaPlayer = useRef<HTMLAudioElement>(null);
+  const [view, setView] = useState<'chat' | 'menu'>('chat');
+  const [convoContext, setConvoContext] = useState<ConvoContext>();
 
   // load messages from local storage
   useEffect(() => {
@@ -66,6 +69,7 @@ function App() {
   const clearSavedMessages = useCallback(() => {
     localStorage.removeItem(localStorageKey);
     setMessages([defaultMessage]);
+    setConvoContext(undefined);
   }, []);
 
   const playAudio = useCallback(async () => {
@@ -143,6 +147,15 @@ function App() {
     [messages, speak]
   );
 
+  const preSetConvoContext = useCallback(
+    (convoContext: ConvoContext) => {
+      setConvoContext(convoContext);
+      onSend(convoContext.prompt);
+      setView('chat');
+    },
+    [onSend]
+  );
+
   const rephrase = useCallback(
     async (userInput: string) => {
       const message = rephraseMessages[LANGUAGE]?.({
@@ -160,15 +173,31 @@ function App() {
 
   return (
     <div className="overflow-hidden h-screen flex flex-col justify-between bg-slate-950 text-white">
-      <Toolbar clearSavedMessages={clearSavedMessages} />
-      <audio id="audio" ref={mediaPlayer}></audio>
-      <Welcome messages={messages} rephrase={rephrase} />
-      <Composer
-        isLoading={isLoading}
-        userInput={userInput}
-        setUserInput={setUserInput}
-        onSend={onSend}
-      />
+      {view === 'menu' && (
+        <Menu
+          closeMenu={() => setView('chat')}
+          language={LANGUAGE}
+          setConvoContext={preSetConvoContext}
+        />
+      )}
+
+      {view === 'chat' && (
+        <>
+          <Toolbar
+            clearSavedMessages={clearSavedMessages}
+            convoContext={convoContext}
+            setView={setView}
+          />
+          <audio id="audio" ref={mediaPlayer}></audio>
+          <Conversation messages={messages} rephrase={rephrase} />
+          <Composer
+            isLoading={isLoading}
+            userInput={userInput}
+            setUserInput={setUserInput}
+            onSend={onSend}
+          />
+        </>
+      )}
     </div>
   );
 }

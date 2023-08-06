@@ -36,7 +36,7 @@ module.exports = {
     'no-var': 'error',
     'object-shorthand': 'warn',
     'prefer-const': 'error',
-    'prefer-template': 'warn',
+    'prefer-template': 'error',
     'import/no-duplicates': [
       'error',
       {
